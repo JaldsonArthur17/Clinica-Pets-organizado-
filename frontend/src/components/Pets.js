@@ -1,38 +1,40 @@
 import { useEffect, useState } from "react";
 
 function Pets() {
-  const [pets, setPets] = useState([]);
-  const [owners, setOwners] = useState([]);
-
+  const [pets, setPets] = useState([]); //aqui é onde a gente 'acessa' a lista dos pets
+  const [owners, setOwners] = useState([]); //aqui a gente acessa a lista dos donos
+//essas são as variáveis que são 'linkadas' no formulário
   const [name, setName] = useState("");
   const [species, setSpecies] = useState("");
   const [ownerId, setOwnerId] = useState("");
 
-  // Controla edição
+  // Controla se estamos criando (null) ou editando (ID do pet)
   const [editingId, setEditingId] = useState(null);
 
-  // Busca pets
+  // esse bloco busca os pets quando a tela carrega
   useEffect(() => {
     fetch("http://localhost:3000/pets")
       .then(res => res.json())
       .then(data => setPets(data));
   }, []);
 
-  // Busca donos
+  // já esse bloco busca os donos quando a tela carrega
   useEffect(() => {
-    fetch("http://localhost:3001/owners")
+    fetch("http://localhost:3000/owners")
       .then(res => res.json())
       .then(data => setOwners(data));
   }, []);
 
+  //aqui é feita a função que salva ou atuliza os pets
   function handleSubmit(e) {
     e.preventDefault();
-
+// Decide se é POST (criar) ou PUT (editar)
     const method = editingId ? "PUT" : "POST";
     const url = editingId
       ? `http://localhost:3000/pets/${editingId}`
       : "http://localhost:3000/pets";
-
+    
+// Envia os dados, incluindo o ID do dono escolhido
     fetch(url, {
       method,
       headers: { "Content-Type": "application/json" },
@@ -42,6 +44,7 @@ function Pets() {
         owner_id: ownerId
       })
     }).then(() => {
+      // Limpa tudo e recarrega a página
       setName("");
       setSpecies("");
       setOwnerId("");
@@ -50,6 +53,7 @@ function Pets() {
     });
   }
 
+//esse bloco preenche o formulário com os dados do pet para edição
   function editPet(pet) {
     setName(pet.name);
     setSpecies(pet.species);
@@ -57,12 +61,15 @@ function Pets() {
     setEditingId(pet.id);
   }
 
+//função que deleta o pet
   function deletePet(id) {
     fetch(`http://localhost:3000/pets/${id}`, {
       method: "DELETE"
     }).then(() => window.location.reload());
   }
 
+
+  //aqui retorna o html --> o que o usuário vai ver
   return (
     <section>
       <h2>Pets</h2>

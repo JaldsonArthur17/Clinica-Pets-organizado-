@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 
+//aqui a gente cria o componente de donos ---> 
+// variáveis pra guardar os dados
 function Owners() {
   const [owners, setOwners] = useState([]);
 
@@ -11,18 +13,18 @@ function Owners() {
   // Controla se estamos editando
   const [editingId, setEditingId] = useState(null);
 
-  // Busca donos
+  // aqui o bloco busca os donos quando a tela é iniciada
   useEffect(() => {
     fetch("http://localhost:3000/owners")
       .then(res => res.json())
       .then(data => setOwners(data));
   }, []);
 
-  // Envia (criar ou editar)
+  // esse bloco envia as alterações do formulário
   function handleSubmit(e) {
     e.preventDefault();
 
-    // Se estiver editando, usa PUT
+    // Se estiver editando, usa PUT, senão ele usa POST pra criar
     const method = editingId ? "PUT" : "POST";
     const url = editingId
       ? `http://localhost:3000/owners/${editingId}`
@@ -42,7 +44,7 @@ function Owners() {
     });
   }
 
-  // Preenche formulário para edição
+  // Preenche formulário com os campos abaixo para edição
   function editOwner(owner) {
     setName(owner.name);
     setPhone(owner.phone);
@@ -52,15 +54,18 @@ function Owners() {
 
   // Deleta dono
   function deleteOwner(id) {
-    fetch(`http://localhost:3001/owners/${id}`, {
+    fetch(`http://localhost:3000/owners/${id}`, {
       method: "DELETE"
+      //aqui recarrega a página depois de deletar
     }).then(() => window.location.reload());
   }
 
+
+//aqui é o bloco que retorna o html --> o que o usuário vai ver
+//aqui tem o formulário, a estrutura dele, e a lista de donos
   return (
     <section>
       <h2>Donos</h2>
-
       <form onSubmit={handleSubmit}>
         <input
           placeholder="Nome"
@@ -77,17 +82,20 @@ function Owners() {
           value={address}
           onChange={e => setAddress(e.target.value)}
         />
-
+{/* Botão que decide sozinho se Salva ---> novo ou Atualiza ---> edição */}
         <button>
           {editingId ? "Atualizar" : "Salvar"}
         </button>
       </form>
-
+  {/* Lista que mostra todos os donos cadastrados */}
       <ul>
         {owners.map(owner => (
           <li key={owner.id}>
+            {/* Mostra o Nome e o Telefone na lista */}
             {owner.name} - {owner.phone}
+            {/* Botão que joga os dados lá pra cima para editar */}
             <button onClick={() => editOwner(owner)}>Editar</button>
+            {/* Botão que apaga esse dono imediatamente */}
             <button onClick={() => deleteOwner(owner.id)}>Excluir</button>
           </li>
         ))}
