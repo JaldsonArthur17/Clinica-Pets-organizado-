@@ -6,6 +6,8 @@ function Pets() {
 //essas são as variáveis que são 'linkadas' no formulário
   const [name, setName] = useState("");
   const [species, setSpecies] = useState("");
+  const [breed, setBreed] = useState("");
+  const [birthdate, setBirthdate] = useState("");
   const [ownerId, setOwnerId] = useState("");
 
   // Controla se estamos criando (null) ou editando (ID do pet)
@@ -41,12 +43,16 @@ function Pets() {
       body: JSON.stringify({
         name,
         species,
+        breed,      
+        birthdate,  
         owner_id: ownerId
       })
     }).then(() => {
       // Limpa tudo e recarrega a página
       setName("");
       setSpecies("");
+      setBreed("");     
+      setBirthdate("");
       setOwnerId("");
       setEditingId(null);
       window.location.reload();
@@ -54,9 +60,13 @@ function Pets() {
   }
 
 //esse bloco preenche o formulário com os dados do pet para edição
+ //esse bloco preenche o formulário com os dados do pet para edição
   function editPet(pet) {
     setName(pet.name);
     setSpecies(pet.species);
+    setBreed(pet.breed || ""); 
+    // Formata a data para YYYY-MM-DD para funcionar no input type="date"
+    setBirthdate(pet.birthdate ? pet.birthdate.split('T')[0] : "");
     setOwnerId(pet.owner_id);
     setEditingId(pet.id);
   }
@@ -87,6 +97,19 @@ function Pets() {
           onChange={e => setSpecies(e.target.value)}
         />
 
+        <input
+          placeholder="Raça"
+          value={breed}
+          onChange={e => setBreed(e.target.value)}
+        />
+
+        <input
+          type="date"
+          placeholder="Data de Nascimento"
+          value={birthdate}
+          onChange={e => setBirthdate(e.target.value)}
+        />
+
         <select
           value={ownerId}
           onChange={e => setOwnerId(e.target.value)}
@@ -108,7 +131,7 @@ function Pets() {
       <ul>
         {pets.map(pet => (
           <li key={pet.id}>
-            {pet.name} ({pet.species}) - Dono: {pet.owner_name}
+            {pet.name} ({pet.species}) / ({pet.breed}) - Dono: {pet.owner_name}
             <button onClick={() => editPet(pet)}>Editar</button>
             <button onClick={() => deletePet(pet.id)}>Excluir</button>
           </li>
