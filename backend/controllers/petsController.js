@@ -1,7 +1,7 @@
 //conexão com o banco de dados
 const db = require("../database");
 
-// Lista pets com o nome do dono
+// Lista pets com o nome do dono (GET)
 exports.getPets = (req, res) => {
     //comando sql para selecionar todos os pets com o nome do dono
     db.query(`
@@ -14,22 +14,32 @@ exports.getPets = (req, res) => {
     });
 };
 
-// Cria pet com os campos: name, species e owner_id obrigatórios
+// Cria pet com os campos: name, species e owner_id obrigatórios (POST)
 exports.createPet = (req, res) => {
     const { name, species, breed, birthdate, owner_id } = req.body;
-    if (!name || !species || !owner_id)
+    
+    if (!name || !species || !owner_id) {
         return res.status(400).send("Campos obrigatórios: name, species e owner_id");
-    //comando pra criar o pet com os campos necessários
-    db.query("INSERT INTO pets (name, species, breed, birthdate, owner_id) VALUES (?, ?, ?, ?, ?)",
-        [name, species, breed, birthdate, owner_id],
-        (err) => {
-            if (err) return res.status(500).send(err);
-            res.send("Pet criado com sucesso!");
+    }
+// Validação: Verifica se o dono existe antes de criar 
+    db.query("SELECT id FROM owners WHERE id = ?", [owner_id], (err, result) => {
+        if (err) return res.status(500).send(err);
+        
+        if (result.length === 0) {
+            return res.status(400).send("Dono não encontrado (owner_id inválido)");
         }
-    );
+
+        db.query("INSERT INTO pets (name, species, breed, birthdate, owner_id) VALUES (?, ?, ?, ?, ?)",
+            [name, species, breed, birthdate, owner_id],
+            (insertErr) => {
+                if (insertErr) return res.status(500).send(insertErr);
+                res.send("Pet criado com sucesso!");
+            }
+        );
+    });
 };
 
-// aqui atualizamos o pet
+// aqui atualizamos o pet (UPDATE)
 exports.updatePet = (req, res) => {
     const { name, species, breed, birthdate, owner_id } = req.body;
     //comando para editar o pet
@@ -42,10 +52,19 @@ exports.updatePet = (req, res) => {
     );
 };
 
-// aqui excluímos o pet
+// aqui excluímos o pet (DELETE)
 exports.deletePet = (req, res) => {
     db.query("DELETE FROM pets WHERE id = ?", [req.params.id], (err) => {
         if (err) return res.status(500).send(err);
         res.send("Pet deletado!");
+    });
+};
+
+// Busca um pet pelo ID 
+exports.getPetById = (req, res) => {
+    db.query("SELECT * FROM pets WHERE id = ?", [req.params.id], (err, result) => {
+        if (err) return res.status(500).send(err);
+        if (result.length === 0) return res.status(404).send("Pet não encontrado");
+        res.send(result[0]);
     });
 };
