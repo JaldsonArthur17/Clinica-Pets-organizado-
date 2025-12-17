@@ -48,8 +48,7 @@ function Owners() {
       setAddress("");
       setEditingId(null);
 
-      // --- MUDANÇA AQUI: Redireciona para a página de sucesso ---
-      // Não usamos mais alert() nem window.location.reload()
+      // --- Redireciona para a página de sucesso ---
       navigate("/success", {
         state: {
           message: editingId
@@ -84,21 +83,19 @@ function Owners() {
   return (
     <section>
       <h2>Gerenciar Donos</h2>
-
-      {/* Formulário organizado (O CSS vai deixá-lo em grade/grid) */}
       <form onSubmit={handleSubmit}>
         <input
           placeholder="Nome Completo"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          required // Campo obrigatório segundo o PDF
+          required // Campo obrigatório 
         />
 
         <input
           placeholder="Telefone (ex: 11 99999-9999)"
           value={phone}
           onChange={(e) => setPhone(e.target.value)}
-          required // Campo obrigatório segundo o PDF
+          required // Campo obrigatório 
         />
 
         <input
@@ -128,7 +125,6 @@ function Owners() {
             <tr key={owner.id}>
               <td>{owner.name}</td>
               <td>{owner.phone}</td>
-              {/* Se não tiver endereço, mostra um tracinho "-" */}
               <td>{owner.address || "-"}</td>
               <td>
                 <button className="btn-edit" onClick={() => editOwner(owner)}>
