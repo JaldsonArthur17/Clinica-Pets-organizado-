@@ -51,8 +51,7 @@ exports.updateAppointment = (req, res) => {
       .status(400)
       .send("ID, Data e nome do veterinário são necessários.");
   }
-
-  // --- CORREÇÃO DA DATA AQUI TAMBÉM ---
+  
   const dateFinal = cleanDate(date);
 
   const sql =
