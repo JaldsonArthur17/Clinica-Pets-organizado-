@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom"; // <--- Importamos o useNavigate
+import { useNavigate } from "react-router-dom"; // serve para navegar entre rotas de forma programática, ou seja, sem precisar clicar em um <Link>
 
 function Pets() {
   // --- ESTADOS (Variáveis de Memória) ---
@@ -16,8 +16,6 @@ function Pets() {
 
   // Controla edição
   const [editingId, setEditingId] = useState(null);
-
-  // --- EFEITOS (Ao carregar a página) ---
 
   // 1. Busca os PETS no backend (Porta 3001)
   useEffect(() => {
@@ -46,7 +44,6 @@ function Pets() {
     }
 
     const method = editingId ? "PUT" : "POST";
-    // URL correta na porta 3001
     const url = editingId
       ? `http://localhost:3001/pets/${editingId}`
       : "http://localhost:3001/pets";
@@ -70,7 +67,7 @@ function Pets() {
       setOwnerId("");
       setEditingId(null);
 
-      // --- MUDANÇA: Redireciona para a página de sucesso ---
+      // --- Redireciona para a página de sucesso ---
       navigate("/success", {
         state: {
           message: editingId
@@ -101,7 +98,6 @@ function Pets() {
     }
   }
 
-  // --- RENDERIZAÇÃO ---
   return (
     <section>
       <h2>Gerenciar Pets</h2>
@@ -134,7 +130,6 @@ function Pets() {
           onChange={(e) => setBirthdate(e.target.value)}
         />
 
-        {/* Dropdown de Donos */}
         <select
           value={ownerId}
           onChange={(e) => setOwnerId(e.target.value)}
