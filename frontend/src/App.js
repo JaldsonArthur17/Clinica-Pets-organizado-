@@ -3,17 +3,18 @@ import Owners from "./components/Owners";
 import Pets from "./components/Pets";
 import Appointments from "./components/Appointments";
 import Envio from "./components/Envio";
-import "./App.css"; // Garanta que o CSS novo está salvo neste arquivo
+import "./App.css";
 
 function App() {
   return (
+    // BrowserRouter habilita o sistema de rotas no React
     <BrowserRouter>
       <div className="container">
+
         <header>
           <h1>Clínica de Pets</h1>
 
-          {/* AQUI ESTÁ A MUDANÇA: Removemos todos os 'style={{...}}' */}
-          {/* O arquivo App.css agora controla a beleza deste menu */}
+          {/* Menu de navegação */}
           <nav>
             <Link to="/owners">Donos</Link>
             <Link to="/pets">Pets</Link>
@@ -21,7 +22,7 @@ function App() {
           </nav>
         </header>
 
-        <Routes>
+        <Routes> {/* usado para definir qual página deve ser exibida (por padrão está a página de donos) */}
           {/* Rota inicial */}
           <Route path="/" element={<Owners />} />
 
