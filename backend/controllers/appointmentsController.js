@@ -1,8 +1,14 @@
 const db = require("../database");
 
+function cleanDate(dateString) {
+  if (!dateString) return null;
+  return dateString.replace("T", " ").replace("Z", "").split(".")[0];
+}
+
 // Listagem das consultas (GET)
 exports.getAppointments = (req, res) => {
-  const sql = "SELECT * FROM appointments";
+  // Adicionei ORDER BY para mostrar as consultas na ordem correta
+  const sql = "SELECT * FROM appointments ORDER BY date ASC";
   db.query(sql, (err, result) => {
     if (err) return res.status(500).send(err);
     res.send(result);
@@ -19,16 +25,15 @@ exports.createAppointment = (req, res) => {
       .send("ID, Data e nome do veterinário são necessários.");
   }
 
-  // Ajuste: O banco geralmente espera 'AGENDADA' simples, sem os traços, mas mantive sua lógica se o ENUM permitir.
+  const dateFinal = cleanDate(date);
   const statusFinal = status || "AGENDADA";
 
   const sql =
     "INSERT INTO appointments (pet_id, date, veterinarian_name, description, status) VALUES (?, ?, ?, ?, ?)";
 
-  // CORREÇÃO: mudado de (err, res) para (err, result)
   db.query(
     sql,
-    [pet_id, date, veterinarian_name, description, statusFinal],
+    [pet_id, dateFinal, veterinarian_name, description, statusFinal],
     (err, result) => {
       if (err) return res.status(500).send(err);
       res.send("Consulta criada com sucesso.");
@@ -47,12 +52,22 @@ exports.updateAppointment = (req, res) => {
       .send("ID, Data e nome do veterinário são necessários.");
   }
 
+  // --- CORREÇÃO DA DATA AQUI TAMBÉM ---
+  const dateFinal = cleanDate(date);
+
   const sql =
     "UPDATE appointments SET pet_id=?, date=?, veterinarian_name=?, description=?, status=? WHERE id=?";
 
   db.query(
     sql,
-    [pet_id, date, veterinarian_name, description, status || "AGENDADA", id],
+    [
+      pet_id,
+      dateFinal,
+      veterinarian_name,
+      description,
+      status || "AGENDADA",
+      id,
+    ],
     (err, result) => {
       if (err) return res.status(500).send(err);
       res.send("Consulta atualizada com sucesso.");
@@ -64,9 +79,8 @@ exports.updateAppointment = (req, res) => {
 exports.deleteAppointment = (req, res) => {
   const { id } = req.params;
 
-  // CORREÇÃO: mudado de (err, res) para (err, result)
   db.query("DELETE FROM appointments WHERE id=?", [id], (err, result) => {
-    if (err) return res.status(500).send(err); // aqui faltava o return também
+    if (err) return res.status(500).send(err);
     res.send("Consulta excluída com sucesso.");
   });
 };

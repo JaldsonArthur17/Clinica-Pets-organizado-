@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 function Appointments() {
   // --- ESTADOS (Variáveis de Memória) ---
   const [appointments, setAppointments] = useState([]); // Lista de consultas
-  const [pets, setPets] = useState([]); // Lista de pets (para o select)
+  const [pets, setPets] = useState([]); // Lista de pets
   const navigate = useNavigate();
 
   // Variáveis do formulário
@@ -16,14 +16,12 @@ function Appointments() {
   // --- EFEITOS (Ao carregar a página) ---
   useEffect(() => {
     // 1. Busca as Consultas
-    // ATENÇÃO: Porta alterada para 3001
     fetch("http://localhost:3001/appointments")
       .then((res) => res.json())
       .then((data) => setAppointments(data))
       .catch((err) => console.error("Erro ao buscar consultas:", err));
 
-    // 2. Busca os Pets (precisamos disso para mostrar o nome do pet e não só o ID)
-    // ATENÇÃO: Porta alterada para 3001
+    // 2. Busca os Pets
     fetch("http://localhost:3001/pets")
       .then((res) => res.json())
       .then((data) => setPets(data))
@@ -36,25 +34,22 @@ function Appointments() {
   function handleSubmit(e) {
     e.preventDefault();
 
-    // ATENÇÃO: Porta alterada para 3001
     fetch("http://localhost:3001/appointments", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         pet_id: petId,
-        date: date, // O input manda formato ISO (YYYY-MM-DDTHH:MM)
+        date: date,
         veterinarian_name: vetName,
         description: description,
-        status: "AGENDADA", // Toda nova consulta começa agendada
+        status: "AGENDADA",
       }),
     }).then(() => {
-      // Limpa os campos
       setPetId("");
       setDate("");
       setVetName("");
       setDescription("");
 
-      // --- MUDANÇA: Redireciona para a página de sucesso ---
       navigate("/success", {
         state: {
           message: "Consulta agendada com sucesso!",
@@ -65,10 +60,9 @@ function Appointments() {
     });
   }
 
-  // Atualizar o status da consulta (PUT) - Bônus do PDF
+  // --- AQUI ESTÁ A CORREÇÃO IMPORTANTE ---
+  // Atualizar o status da consulta (PUT) com tratamento de erro
   function updateStatus(id, newStatus, currentData) {
-    // O PDF pede update, então enviamos os dados antigos + o status novo
-    // ATENÇÃO: Porta alterada para 3001
     fetch(`http://localhost:3001/appointments/${id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
@@ -77,34 +71,45 @@ function Appointments() {
         date: currentData.date,
         veterinarian_name: currentData.veterinarian_name,
         description: currentData.description,
-        status: newStatus, // Aqui muda (REALIZADA ou CANCELADA)
+        status: newStatus, // "REALIZADA" ou "CANCELADA"
       }),
-    }).then(() => window.location.reload());
+    })
+      .then(async (response) => {
+        // Se o servidor devolver erro (ex: 500), pegamos a mensagem
+        if (!response.ok) {
+          const erroTexto = await response.text();
+          throw new Error(erroTexto);
+        }
+        // Se deu certo, recarrega a página
+        window.location.reload();
+      })
+      .catch((error) => {
+        // MOSTRA O ERRO NA TELA (Agora saberemos o motivo!)
+        console.error(error);
+        alert("Erro ao atualizar status:\n" + error.message);
+      });
   }
 
-  // Função auxiliar: Transforma o ID do pet (ex: 1) no Nome (ex: Rex)
+  // Funções auxiliares
   function getPetName(id) {
     const pet = pets.find((p) => p.id === id);
     return pet ? pet.name : "Pet Excluído/Desconhecido";
   }
 
-  // Função auxiliar: Formata a data para ficar bonita (Dia/Mês/Ano Hora:Min)
   function formatDate(isoString) {
     return new Date(isoString).toLocaleString("pt-BR");
   }
 
-  // --- RENDERIZAÇÃO (Tela) ---
+  // --- RENDERIZAÇÃO ---
   return (
     <section>
       <h2>Consultas Veterinárias</h2>
 
-      {/* Formulário de Agendamento (Grade do CSS App.css) */}
       <form onSubmit={handleSubmit}>
-        {/* Dropdown de Pets */}
         <select
           value={petId}
           onChange={(e) => setPetId(e.target.value)}
-          required // Obrigatório
+          required
         >
           <option value="">Selecione o Pet</option>
           {pets.map((pet) => (
@@ -114,19 +119,18 @@ function Appointments() {
           ))}
         </select>
 
-        {/* Input de Data e Hora */}
         <input
           type="datetime-local"
           value={date}
           onChange={(e) => setDate(e.target.value)}
-          required // Obrigatório
-        ></input>
+          required
+        />
 
         <input
           placeholder="Nome do Veterinário"
           value={vetName}
           onChange={(e) => setVetName(e.target.value)}
-          required // Obrigatório
+          required
         />
 
         <input
@@ -138,7 +142,6 @@ function Appointments() {
         <button type="submit">Agendar Consulta</button>
       </form>
 
-      {/* --- MELHORIA VISUAL: Tabela --- */}
       <table className="crud-table">
         <thead>
           <tr>
@@ -153,23 +156,15 @@ function Appointments() {
         <tbody>
           {appointments.map((app) => (
             <tr key={app.id}>
-              {/* Data formatada */}
               <td>{formatDate(app.date)}</td>
-
-              {/* Nome do Pet buscado pelo ID */}
               <td>{getPetName(app.pet_id)}</td>
-
               <td>{app.veterinarian_name}</td>
               <td>{app.description || "-"}</td>
-
-              {/* Status com cor dinâmica (CSS .status-agendada, etc) */}
               <td>
                 <span className={`status-${app.status.toLowerCase()}`}>
                   {app.status}
                 </span>
               </td>
-
-              {/* Botões de Ação (Só aparecem se estiver AGENDADA) */}
               <td>
                 {app.status === "AGENDADA" && (
                   <>
