@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 function Appointments() {
   // --- ESTADOS (Variáveis de Memória) ---
   const [appointments, setAppointments] = useState([]); // Lista de consultas
   const [pets, setPets] = useState([]); // Lista de pets (para o select)
+  const navigate = useNavigate();
 
   // Variáveis do formulário
   const [petId, setPetId] = useState("");
@@ -14,13 +16,15 @@ function Appointments() {
   // --- EFEITOS (Ao carregar a página) ---
   useEffect(() => {
     // 1. Busca as Consultas
-    fetch("http://localhost:3000/appointments")
+    // ATENÇÃO: Porta alterada para 3001
+    fetch("http://localhost:3001/appointments")
       .then((res) => res.json())
       .then((data) => setAppointments(data))
       .catch((err) => console.error("Erro ao buscar consultas:", err));
 
     // 2. Busca os Pets (precisamos disso para mostrar o nome do pet e não só o ID)
-    fetch("http://localhost:3000/pets")
+    // ATENÇÃO: Porta alterada para 3001
+    fetch("http://localhost:3001/pets")
       .then((res) => res.json())
       .then((data) => setPets(data))
       .catch((err) => console.error("Erro ao buscar pets:", err));
@@ -32,7 +36,8 @@ function Appointments() {
   function handleSubmit(e) {
     e.preventDefault();
 
-    fetch("http://localhost:3000/appointments", {
+    // ATENÇÃO: Porta alterada para 3001
+    fetch("http://localhost:3001/appointments", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -43,15 +48,28 @@ function Appointments() {
         status: "AGENDADA", // Toda nova consulta começa agendada
       }),
     }).then(() => {
-      alert("Consulta agendada com sucesso!");
-      window.location.reload();
+      // Limpa os campos
+      setPetId("");
+      setDate("");
+      setVetName("");
+      setDescription("");
+
+      // --- MUDANÇA: Redireciona para a página de sucesso ---
+      navigate("/success", {
+        state: {
+          message: "Consulta agendada com sucesso!",
+          returnPath: "/appointments",
+          returnText: "Voltar para Consultas",
+        },
+      });
     });
   }
 
   // Atualizar o status da consulta (PUT) - Bônus do PDF
   function updateStatus(id, newStatus, currentData) {
     // O PDF pede update, então enviamos os dados antigos + o status novo
-    fetch(`http://localhost:3000/appointments/${id}`, {
+    // ATENÇÃO: Porta alterada para 3001
+    fetch(`http://localhost:3001/appointments/${id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -102,7 +120,7 @@ function Appointments() {
           value={date}
           onChange={(e) => setDate(e.target.value)}
           required // Obrigatório
-        />
+        ></input>
 
         <input
           placeholder="Nome do Veterinário"

@@ -1,33 +1,35 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom"; // <--- Importamos o useNavigate
 
 function Pets() {
   // --- ESTADOS (Variáveis de Memória) ---
-  const [pets, setPets] = useState([]); // Lista de pets para exibir na tabela
+  const [pets, setPets] = useState([]);
   const [owners, setOwners] = useState([]); // Lista de donos para o <select>
+  const navigate = useNavigate(); // <--- Iniciamos o hook de navegação
 
   // Variáveis do formulário
   const [name, setName] = useState("");
   const [species, setSpecies] = useState("");
   const [breed, setBreed] = useState("");
   const [birthdate, setBirthdate] = useState("");
-  const [ownerId, setOwnerId] = useState(""); // ID do dono selecionado
+  const [ownerId, setOwnerId] = useState("");
 
-  // Controla se estamos criando (null) ou editando (ID do pet)
+  // Controla edição
   const [editingId, setEditingId] = useState(null);
 
   // --- EFEITOS (Ao carregar a página) ---
 
-  // 1. Busca os PETS no backend
+  // 1. Busca os PETS no backend (Porta 3001)
   useEffect(() => {
-    fetch("http://localhost:3000/pets")
+    fetch("http://localhost:3001/pets")
       .then((res) => res.json())
       .then((data) => setPets(data))
       .catch((err) => console.error("Erro ao buscar pets:", err));
   }, []);
 
-  // 2. Busca os DONOS no backend (essencial para o dropdown funcionar)
+  // 2. Busca os DONOS no backend (Porta 3001)
   useEffect(() => {
-    fetch("http://localhost:3000/owners")
+    fetch("http://localhost:3001/owners")
       .then((res) => res.json())
       .then((data) => setOwners(data))
       .catch((err) => console.error("Erro ao buscar donos:", err));
@@ -35,20 +37,19 @@ function Pets() {
 
   // --- FUNÇÕES DE AÇÃO ---
 
-  // Salvar ou Atualizar Pet
   function handleSubmit(e) {
-    e.preventDefault(); // Impede o recarregamento padrão
+    e.preventDefault();
 
-    // Validação extra: garante que um dono foi escolhido
     if (!ownerId) {
       alert("Por favor, selecione um dono!");
       return;
     }
 
     const method = editingId ? "PUT" : "POST";
+    // URL correta na porta 3001
     const url = editingId
-      ? `http://localhost:3000/pets/${editingId}`
-      : "http://localhost:3000/pets";
+      ? `http://localhost:3001/pets/${editingId}`
+      : "http://localhost:3001/pets";
 
     fetch(url, {
       method,
@@ -61,57 +62,63 @@ function Pets() {
         owner_id: ownerId,
       }),
     }).then(() => {
-      // Limpa o formulário e recarrega
+      // Limpa o formulário
       setName("");
       setSpecies("");
       setBreed("");
       setBirthdate("");
       setOwnerId("");
       setEditingId(null);
-      alert("Pet salvo com sucesso!");
-      window.location.reload();
+
+      // --- MUDANÇA: Redireciona para a página de sucesso ---
+      navigate("/success", {
+        state: {
+          message: editingId
+            ? "Pet atualizado com sucesso!"
+            : "Novo pet cadastrado!",
+          returnPath: "/pets",
+          returnText: "Voltar para Lista de Pets",
+        },
+      });
     });
   }
 
-  // Prepara o formulário para editar um pet existente
   function editPet(pet) {
     setName(pet.name);
     setSpecies(pet.species);
     setBreed(pet.breed || "");
-    // Ajusta a data para o formato YYYY-MM-DD que o input aceita
     setBirthdate(pet.birthdate ? pet.birthdate.split("T")[0] : "");
     setOwnerId(pet.owner_id);
     setEditingId(pet.id);
   }
 
-  // Exclui um pet
   function deletePet(id) {
     if (window.confirm("Tem certeza que deseja excluir este pet?")) {
-      fetch(`http://localhost:3000/pets/${id}`, {
+      // URL correta na porta 3001
+      fetch(`http://localhost:3001/pets/${id}`, {
         method: "DELETE",
       }).then(() => window.location.reload());
     }
   }
 
-  // --- RENDERIZAÇÃO (O que aparece na tela) ---
+  // --- RENDERIZAÇÃO ---
   return (
     <section>
       <h2>Gerenciar Pets</h2>
 
-      {/* Formulário (O CSS App.css vai organizar em grade) */}
       <form onSubmit={handleSubmit}>
         <input
           placeholder="Nome do pet"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          required // Obrigatório pelo PDF
+          required
         />
 
         <input
           placeholder="Espécie (ex: Cachorro, Gato)"
           value={species}
           onChange={(e) => setSpecies(e.target.value)}
-          required // Obrigatório pelo PDF
+          required
         />
 
         <input
@@ -131,7 +138,7 @@ function Pets() {
         <select
           value={ownerId}
           onChange={(e) => setOwnerId(e.target.value)}
-          required // Obrigatório ter dono
+          required
         >
           <option value="">Selecione o dono</option>
           {owners.map((owner) => (
@@ -146,7 +153,6 @@ function Pets() {
         </button>
       </form>
 
-      {/* --- MELHORIA VISUAL: Tabela em vez de Lista <ul> --- */}
       <table className="crud-table">
         <thead>
           <tr>
@@ -163,7 +169,6 @@ function Pets() {
               <td>{pet.name}</td>
               <td>{pet.species}</td>
               <td>{pet.breed || "-"}</td>
-              {/* Mostra o nome do dono */}
               <td>{pet.owner_name}</td>
               <td>
                 <button className="btn-edit" onClick={() => editPet(pet)}>
