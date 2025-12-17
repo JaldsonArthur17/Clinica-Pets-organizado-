@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 function Owners() {
   // --- ESTADOS (Memória do Componente) ---
   const [owners, setOwners] = useState([]); // Lista que guarda os donos vindos do banco
+  const navigate = useNavigate(); // Hook para navegação sem recarregar
 
   // Variáveis ligadas aos campos do formulário
   const [name, setName] = useState("");
@@ -15,7 +17,8 @@ function Owners() {
   // --- EFEITOS (Ao carregar a página) ---
   useEffect(() => {
     // Busca a lista de donos no Backend assim que a tela abre
-    fetch("http://localhost:3000/owners")
+    // (Usando a porta 3001 conforme sua configuração)
+    fetch("http://localhost:3001/owners")
       .then((res) => res.json())
       .then((data) => setOwners(data))
       .catch((error) => console.error("Erro ao buscar donos:", error));
@@ -30,8 +33,8 @@ function Owners() {
     // Decide se é POST (criar novo) ou PUT (editar existente)
     const method = editingId ? "PUT" : "POST";
     const url = editingId
-      ? `http://localhost:3000/owners/${editingId}`
-      : "http://localhost:3000/owners";
+      ? `http://localhost:3001/owners/${editingId}`
+      : "http://localhost:3001/owners";
 
     // Envia os dados para o servidor
     fetch(url, {
@@ -44,8 +47,18 @@ function Owners() {
       setPhone("");
       setAddress("");
       setEditingId(null);
-      alert("Operação realizada com sucesso!");
-      window.location.reload(); // Atualiza a tela para mostrar os dados novos
+
+      // --- MUDANÇA AQUI: Redireciona para a página de sucesso ---
+      // Não usamos mais alert() nem window.location.reload()
+      navigate("/success", {
+        state: {
+          message: editingId
+            ? "Dono atualizado com sucesso!"
+            : "Novo dono cadastrado!",
+          returnPath: "/owners",
+          returnText: "Voltar para Lista de Donos",
+        },
+      });
     });
   }
 
@@ -61,7 +74,7 @@ function Owners() {
   function deleteOwner(id) {
     // Pergunta de segurança antes de apagar
     if (window.confirm("Tem certeza que deseja excluir este dono?")) {
-      fetch(`http://localhost:3000/owners/${id}`, {
+      fetch(`http://localhost:3001/owners/${id}`, {
         method: "DELETE",
       }).then(() => window.location.reload());
     }
@@ -100,7 +113,7 @@ function Owners() {
         </button>
       </form>
 
-      {/* Tabela de Listagem (Visual Profissional) */}
+      {/* Tabela de Listagem */}
       <table className="crud-table">
         <thead>
           <tr>

@@ -163,7 +163,7 @@ function Pets() {
               <td>{pet.name}</td>
               <td>{pet.species}</td>
               <td>{pet.breed || "-"}</td>
-              {/* Mostra o nome do dono (vindo do INNER JOIN do backend) */}
+              {/* Mostra o nome do dono */}
               <td>{pet.owner_name}</td>
               <td>
                 <button className="btn-edit" onClick={() => editPet(pet)}>
