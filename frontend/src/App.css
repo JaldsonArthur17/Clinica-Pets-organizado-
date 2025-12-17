@@ -1,22 +1,153 @@
+/* =========================================================
+  ESTILOS GERAIS (Layout e Fundo)
+   ========================================================= */
 body {
-  font-family: Arial, sans-serif;
-  background: #ad2f2f;
-  
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Fonte mais moderna */
+  background-color: #b65016; /* Fundo cinza claro, mais suave para os olhos */
+  margin: 0;
+  padding: 0;
+  color: #fafafa; /* Texto cinza escuro para boa leitura */
 }
 
 .container {
-  width: 80%;
-  margin: auto;
+  width: 90%;          /* Ocupa 90% da tela */
+  max-width: 1000px;   /* Mas não passa de 1000px de largura (bom para telas grandes) */
+  margin: 40px auto;   /* Centraliza o container na tela */
+  background: #80370c;   /* Fundo branco para o conteúdo principal */
+  padding: 30px;
+  border-radius: 8px;  /* Cantos arredondados */
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1); /* Sombra suave para dar profundidade */
 }
 
-section {
-  background: white;
+/* =========================================================
+   NAVEGAÇÃO (Menu Superior)
+   ========================================================= */
+/* Estilo do cabeçalho onde fica o título e o menu */
+header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+h1 {
+  color: #ffffff; /* Azul escuro elegante */
+  margin-bottom: 20px;
+}
+
+/* Barra de navegação flexível */
+nav {
+  background-color: #f7f7f7; /* Fundo escuro */
   padding: 15px;
-  margin-top: 20px;
   border-radius: 5px;
+  display: flex;             /* Coloca os links lado a lado */
+  justify-content: center;   /* Centraliza os links */
+  gap: 20px;                 /* Espaço entre os links */
 }
 
-input, button {
-  margin: 5px;
-  padding: 5px;
+/* Links do menu */
+nav a {
+  color:  #000000;              /* Texto branco */
+  text-decoration: none;     /* Tira o sublinhado padrão */
+  font-weight: bold;
+  font-size: 16px;
+  padding: 10px 20px;
+  border-radius: 4px;
+  transition: background 0.3s; /* Animação suave ao passar o mouse */
 }
+
+nav a:hover {
+  background-color: #1abc9c; /* Cor de destaque (verde água) ao passar o mouse */
+}
+
+/* FORMULÁRIOS (Grid Layout)
+/* Transforma o formulário em uma grade organizada */
+form {
+  display: grid;
+  grid-template-columns: 1fr 1fr; /* Cria duas colunas de tamanho igual */
+  gap: 20px;                      /* Espaço entre os campos */
+  background: #f8f9fa;            /* Fundo levemente cinza para destacar o formulário */
+  padding: 25px;
+  border-radius: 8px;
+  border: 1px solid #dee2e6;
+  margin-bottom: 30px;
+}
+
+/* Faz inputs e selects ocuparem toda a largura da coluna */
+input, select {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  box-sizing: border-box; /* Garante que o padding não aumente o tamanho total */
+  font-size: 14px;
+}
+
+/* Estilo especial para o botão de salvar/atualizar */
+button[type="submit"] {
+  grid-column: span 2;     /* Faz o botão ocupar as duas colunas inteiras */
+  background-color: #2980b9; /* Azul forte */
+  color: white;
+  border: none;
+  padding: 12px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  border-radius: 4px;
+  margin-top: 10px;
+}
+
+button[type="submit"]:hover {
+  background-color: #3498db; /* Azul mais claro ao passar o mouse */
+}
+
+/* =========================================================
+   TABELAS (Listagem de Dados) - Melhoria Visual 1
+   ========================================================= */
+/* Removemos o <ul> e usamos tabelas, estilo aqui: */
+.crud-table {
+  width: 100%;
+  border-collapse: collapse; /* Remove espaços entre as bordas */
+  margin-top: 20px;
+}
+
+/* Cabeçalho da tabela */
+.crud-table th {
+  background-color: #2c3e50;
+  color: white;
+  padding: 12px;
+  text-align: left;
+}
+
+/* Linhas da tabela */
+.crud-table td {
+  padding: 12px;
+  border-bottom: 1px solid #ddd; /* Linha fina separando itens */
+}
+
+/* Efeito zebrado: linhas pares com cor diferente */
+.crud-table tr:nth-child(even) {
+  background-color: #f2f2f2;
+}
+
+/*BOTÕES DE AÇÃO (Editar/Excluir) */
+.btn-edit, .btn-delete {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-right: 5px;
+  color: white;
+  font-size: 12px;
+}
+
+.btn-edit {
+  background-color: #f39c12; /* Laranja para editar */
+}
+
+.btn-delete {
+  background-color: #e74c3c; /* Vermelho para excluir */
+}
+
+/*STATUS DAS CONSULTAS*/
+.status-agendada { color: #d35400; font-weight: bold; }
+.status-realizada { color: #27ae60; font-weight: bold; }
+.status-cancelada { color: #c0392b; font-weight: bold; }

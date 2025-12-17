@@ -1,8 +1,16 @@
+/*Estilos Globais */
+
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
+  /* Usando a mesma fonte moderna que definimos no design */
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  
+  /* Cor de fundo cinza claro para a página toda (fora do container branco) */
+  background-color: #e9ecef; 
+  
+  /* Cor do texto padrão */
+  color: #333;
+  
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }

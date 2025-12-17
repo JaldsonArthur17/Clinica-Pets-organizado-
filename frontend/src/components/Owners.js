@@ -1,105 +1,137 @@
 import { useEffect, useState } from "react";
 
-//aqui a gente cria o componente de donos ---> 
-// variáveis pra guardar os dados
 function Owners() {
-  const [owners, setOwners] = useState([]);
+  // --- ESTADOS (Memória do Componente) ---
+  const [owners, setOwners] = useState([]); // Lista que guarda os donos vindos do banco
 
-  // Campos do formulário
+  // Variáveis ligadas aos campos do formulário
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
 
-  // Controla se estamos editando
+  // Controla se estamos criando (null) ou editando (ID do dono)
   const [editingId, setEditingId] = useState(null);
 
-  // aqui o bloco busca os donos quando a tela é iniciada
+  // --- EFEITOS (Ao carregar a página) ---
   useEffect(() => {
+    // Busca a lista de donos no Backend assim que a tela abre
     fetch("http://localhost:3000/owners")
-      .then(res => res.json())
-      .then(data => setOwners(data));
+      .then((res) => res.json())
+      .then((data) => setOwners(data))
+      .catch((error) => console.error("Erro ao buscar donos:", error));
   }, []);
 
-  // esse bloco envia as alterações do formulário
-  function handleSubmit(e) {
-    e.preventDefault();
+  // --- FUNÇÕES DE AÇÃO ---
 
-    // Se estiver editando, usa PUT, senão ele usa POST pra criar
+  // Função disparada ao clicar em Salvar/Atualizar
+  function handleSubmit(e) {
+    e.preventDefault(); // Evita que a página recarregue sozinha
+
+    // Decide se é POST (criar novo) ou PUT (editar existente)
     const method = editingId ? "PUT" : "POST";
     const url = editingId
       ? `http://localhost:3000/owners/${editingId}`
       : "http://localhost:3000/owners";
 
+    // Envia os dados para o servidor
     fetch(url, {
       method,
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, phone, address })
+      body: JSON.stringify({ name, phone, address }),
     }).then(() => {
-      // Limpa formulário
+      // Limpa os campos do formulário
       setName("");
       setPhone("");
       setAddress("");
       setEditingId(null);
-      window.location.reload();
+      alert("Operação realizada com sucesso!");
+      window.location.reload(); // Atualiza a tela para mostrar os dados novos
     });
   }
 
-  // Preenche formulário com os campos abaixo para edição
+  // Preenche o formulário com os dados de um dono para edição
   function editOwner(owner) {
     setName(owner.name);
     setPhone(owner.phone);
-    setAddress(owner.address);
-    setEditingId(owner.id);
+    setAddress(owner.address || ""); // Se não tiver endereço, deixa vazio
+    setEditingId(owner.id); // Avisa o sistema que estamos no modo de edição
   }
 
-  // Deleta dono
+  // Deleta um dono
   function deleteOwner(id) {
-    fetch(`http://localhost:3000/owners/${id}`, {
-      method: "DELETE"
-      //aqui recarrega a página depois de deletar
-    }).then(() => window.location.reload());
+    // Pergunta de segurança antes de apagar
+    if (window.confirm("Tem certeza que deseja excluir este dono?")) {
+      fetch(`http://localhost:3000/owners/${id}`, {
+        method: "DELETE",
+      }).then(() => window.location.reload());
+    }
   }
 
-
-//aqui é o bloco que retorna o html --> o que o usuário vai ver
-//aqui tem o formulário, a estrutura dele, e a lista de donos
+  // --- O QUE APARECE NA TELA (JSX) ---
   return (
     <section>
-      <h2>Donos</h2>
+      <h2>Gerenciar Donos</h2>
+
+      {/* Formulário organizado (O CSS vai deixá-lo em grade/grid) */}
       <form onSubmit={handleSubmit}>
         <input
-          placeholder="Nome"
+          placeholder="Nome Completo"
           value={name}
-          onChange={e => setName(e.target.value)}
+          onChange={(e) => setName(e.target.value)}
+          required // Campo obrigatório segundo o PDF
         />
+
         <input
-          placeholder="Telefone"
+          placeholder="Telefone (ex: 11 99999-9999)"
           value={phone}
-          onChange={e => setPhone(e.target.value)}
+          onChange={(e) => setPhone(e.target.value)}
+          required // Campo obrigatório segundo o PDF
         />
+
         <input
-          placeholder="Endereço"
+          placeholder="Endereço (Opcional)"
           value={address}
-          onChange={e => setAddress(e.target.value)}
+          onChange={(e) => setAddress(e.target.value)}
         />
-{/* Botão que decide sozinho se Salva ---> novo ou Atualiza ---> edição */}
-        <button>
-          {editingId ? "Atualizar" : "Salvar"}
+
+        {/* O botão muda o texto dependendo se está editando ou criando */}
+        <button type="submit">
+          {editingId ? "Atualizar Dono" : "Salvar Dono"}
         </button>
       </form>
-  {/* Lista que mostra todos os donos cadastrados */}
-      <ul>
-        {owners.map(owner => (
-          <li key={owner.id}>
-            {/* Mostra o Nome e o Telefone na lista */}
-            {owner.name} - {owner.phone}
-            {/* Botão que joga os dados lá pra cima para editar */}
-            <button onClick={() => editOwner(owner)}>Editar</button>
-            {/* Botão que apaga esse dono imediatamente */}
-            <button onClick={() => deleteOwner(owner.id)}>Excluir</button>
-          </li>
-        ))}
-      </ul>
+
+      {/* Tabela de Listagem (Visual Profissional) */}
+      <table className="crud-table">
+        <thead>
+          <tr>
+            <th>Nome</th>
+            <th>Telefone</th>
+            <th>Endereço</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          {owners.map((owner) => (
+            <tr key={owner.id}>
+              <td>{owner.name}</td>
+              <td>{owner.phone}</td>
+              {/* Se não tiver endereço, mostra um tracinho "-" */}
+              <td>{owner.address || "-"}</td>
+              <td>
+                <button className="btn-edit" onClick={() => editOwner(owner)}>
+                  Editar
+                </button>
+                <button
+                  className="btn-delete"
+                  onClick={() => deleteOwner(owner.id)}
+                >
+                  Excluir
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </section>
   );
 }
