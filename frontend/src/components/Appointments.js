@@ -60,7 +60,6 @@ function Appointments() {
     });
   }
 
-  // --- AQUI ESTÁ A CORREÇÃO IMPORTANTE ---
   // Atualizar o status da consulta (PUT) com tratamento de erro
   function updateStatus(id, newStatus, currentData) {
     fetch(`http://localhost:3001/appointments/${id}`, {
